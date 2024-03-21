@@ -1,0 +1,254 @@
+//Importing Packages And Libraries
+import java.util.Scanner;
+
+public class W2052093_PlaneManagement {
+
+    public static int[][] Seat_Order = {
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+    };
+
+    private final static Ticket[] ticketsSold = new Ticket[56]; // Maximum seats in the plane
+    private  static int ticketCount = 0;
+
+    public static void main(String[] args) {
+        System.out.println("Welcome To The Plane Management Application");
+
+        int choice;
+        do {
+            // Create a Scanner object
+            Scanner scanner = new Scanner(System.in);
+            //Displaying the user menu.
+            System.out.println("\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+            System.out.println("\t \tMenu Options:");
+            System.out.println("\nMenu:");
+            System.out.println("1. Buy a seat");
+            System.out.println("2. Cancel a seat");
+            System.out.println("3. Find first available seat");
+            System.out.println("4. Show seating plan");
+            System.out.println("5. Print tickets info");
+            System.out.println("6. Search ticket");
+            System.out.println("0. Exit");
+            System.out.println("\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+            System.out.print("Enter your choice: ");
+
+            // Read user choice
+            choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            // Process user choice
+            switch (choice) {
+                case 1:
+                    buySeat();
+                    break;
+                case 2:
+                    cancelSeat();
+                    break;
+                case 3:
+                    findFirstAvailable();
+                    break;
+                case 4:
+                    showSeatingPlan();
+                    break;
+                case 5:
+                    print_tickets_info();
+                    break;
+                case 6:
+                    search_ticket();
+                    break;
+                case 0:
+                    System.out.println("Exiting...");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        } while (choice != 0);
+    }
+
+    private static void buySeat(){
+        Scanner input = new Scanner(System.in);
+
+        System.out.println("\nCurrent Seating Plan:");
+        SeatPlan();
+
+        System.out.print("Enter row letter (A to D): ");
+        char row = input.next().toUpperCase().charAt(0);
+
+        if (row < 'A' || row > 'D') {
+            System.out.println("Invalid row letter. Please enter a valid row (A to D).");
+            return;
+        }
+
+        System.out.print("Enter seat number (1 to 14): ");
+        int seatNumber = input.nextInt();
+
+        if (seatNumber < 1 || seatNumber > 14) {
+            System.out.println("Invalid seat number. Please enter a valid seat number (1 to 14).");
+            return;
+        }
+
+        if (Seat_Order[row - 'A'][seatNumber - 1] == 1) {
+            System.out.println("Seat is already sold. Please choose another seat.");
+            return;
+        }
+
+        Seat_Order[row - 'A'][seatNumber - 1] = 1;
+
+        // Prompt for person information
+        System.out.print("Enter name: ");
+        String name = input.next();
+        System.out.print("Enter surname: ");
+        String surname = input.next();
+        System.out.print("Enter email: ");
+        String email = input.next();
+
+        Person person = new Person(name, surname, email);
+
+        // Calculate price (you can adjust this logic)
+        double price = calculatePrice(row, seatNumber);
+
+        // Create ticket
+        Ticket ticket = new Ticket(String.valueOf(row), seatNumber, price, person);
+
+        // Add ticket to the array of tickets
+        ticketsSold[ticketCount] = ticket;
+        ticketsSold[ticketCount].save();
+        ticketCount++;
+
+        System.out.println("Seat purchased successfully!");
+
+        // Display the updated seating plan
+        System.out.println("Updated Seating Plan:");
+        SeatPlan();
+    }
+
+    private static void cancelSeat() {
+        Scanner input = new Scanner(System.in);
+
+        System.out.println("\nCurrent Seating Plan:");
+        SeatPlan();
+
+        System.out.print("Enter row letter (A to D): ");
+        char row = input.next().toUpperCase().charAt(0);
+
+        if (row < 'A' || row > 'D') {
+            System.out.println("Invalid row letter. Please enter a valid row (A to D).");
+            return;
+        }
+
+        System.out.print("Enter seat number (1 to 14): ");
+        int seatNumber = input.nextInt();
+
+        if (seatNumber < 1 || seatNumber > 14) {
+            System.out.println("Invalid seat number. Please enter a valid seat number (1 to 14).");
+            return;
+        }
+
+        if (Seat_Order[row - 'A'][seatNumber - 1] == 0) {
+            System.out.println("Seat is not sold. No need to cancel.");
+            return;
+        }
+
+        Seat_Order[row - 'A'][seatNumber - 1] = 0;
+
+        System.out.println("Seat canceled successfully!");
+
+        // Display the updated seating plan
+        System.out.println("Updated Seating Plan:");
+        SeatPlan();
+    }
+
+    private static void findFirstAvailable() {
+
+        System.out.println("\nFinding the first available seat...");
+
+        char rowLabel = 'A';
+        for (int row = 0; row < Seat_Order.length; row++) {
+            for (int col = 0; col < Seat_Order[row].length; col++) {
+                if (Seat_Order[row][col] == 0) {
+                    System.out.println("First available seat found: Row " + rowLabel + ", Seat " + (col + 1));
+                    return;
+                }
+            }
+            rowLabel++;
+        }
+        System.out.println("No available seats found.");
+
+    }
+
+    private static void showSeatingPlan() {
+        System.out.println("Current Seating Plan:");
+        SeatPlan();
+    }
+
+    public static void SeatPlan() {
+        System.out.print("");
+        for (int col = 0; col <= Seat_Order[0].length; col++) {
+            if (col <= 9) {
+                System.out.print(col + "   ");
+            } else {
+                System.out.print(col + "  ");
+            }
+        }
+        System.out.println();
+
+        char rowLabel = 'A';
+        for (int row = 0; row < Seat_Order.length; row++) {
+            System.out.print(rowLabel + "   ");
+            for (int col = 0; col < Seat_Order[row].length; col++) {
+                System.out.print(Seat_Order[row][col] + "   ");
+            }
+            System.out.println();
+            rowLabel++;
+        }
+    }
+    private static void print_tickets_info() {
+        System.out.println("Tickets Information:");
+        double totalAmount = 0;
+        for (int i = 0; i < ticketCount; i++) {
+            System.out.println("Ticket " + (i + 1) + ":");
+            ticketsSold[i].printInfo();
+            totalAmount += ticketsSold[i].getPrice();
+        }
+        System.out.println("Total Amount: £" + totalAmount);
+    }
+    private static void search_ticket() {
+        Scanner input = new Scanner(System.in);
+
+        System.out.print("Enter row letter (A to D): ");
+        char row = input.next().toUpperCase().charAt(0);
+
+        if (row < 'A' || row > 'D') {
+            System.out.println("Invalid row letter. Please enter a valid row (A to D).");
+            return;
+        }
+
+        System.out.print("Enter seat number (1 to 14): ");
+        int seatNumber = input.nextInt();
+
+        if (seatNumber < 1 || seatNumber > 14) {
+            System.out.println("Invalid seat number. Please enter a valid seat number (1 to 14).");
+            return;
+        }
+
+        boolean ticketFound = false;
+        for (int i = 0; i < ticketCount; i++) {
+            if (ticketsSold[i].getRow().equals(String.valueOf(row)) && ticketsSold[i].getSeat() == seatNumber) {
+                System.out.println("Ticket found:");
+                ticketsSold[i].printInfo();
+                ticketFound = true;
+                break;
+            }
+        }
+
+        if (!ticketFound) {
+            System.out.println("This seat is available.");
+        }
+    }
+    private static double calculatePrice(char row, int seatNumber) {
+        // Implement your price calculation logic here
+        return 200.0; // Default price
+    }
+}
